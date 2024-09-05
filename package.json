@@ -1,6 +1,6 @@
 {
   "name": "remix-example",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,24 +12,25 @@
     "start": "remix-serve build"
   },
   "dependencies": {
-    "@radix-ui/react-toast": "1.1.5",
-    "@remix-run/node": "2.9.2",
-    "@remix-run/react": "2.9.2",
-    "@remix-run/serve": "2.9.2",
-    "algoliasearch": "4.23.3",
-    "instantsearch.css": "8.2.1",
+    "@radix-ui/react-toast": "1.2.1",
+    "@remix-run/node": "2.11.2",
+    "@remix-run/react": "2.11.2",
+    "@remix-run/serve": "2.11.2",
+    "@searchkit/instantsearch-client": "^4.14.0",
+    "algoliasearch": "5.2.5",
+    "instantsearch.css": "8.5.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-instantsearch": "7.11.0"
+    "react-instantsearch": "7.13.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "2.9.2",
-    "@remix-run/eslint-config": "2.9.2",
-    "@types/react": "18.0.17",
-    "@types/react-dom": "18.0.6",
+    "@remix-run/dev": "2.11.2",
+    "@remix-run/eslint-config": "2.11.2",
+    "@types/react": "18.3.5",
+    "@types/react-dom": "18.3.0",
     "npm-run-all": "4.1.5",
-    "tailwindcss": "3.1.6",
-    "typescript": "5.4.5"
+    "tailwindcss": "3.4.10",
+    "typescript": "5.5.4"
   },
   "engines": {
     "node": ">=14"

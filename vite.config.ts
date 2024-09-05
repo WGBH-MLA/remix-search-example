@@ -10,7 +10,7 @@ export default defineConfig({
     remix(),
   ],
   server: {
-    port: 3000,
+    port: 1234,
     host: '0.0.0.0',
     fs: {
       strict: true,

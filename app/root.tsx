@@ -1,7 +1,7 @@
 import type { MetaFunction } from '@remix-run/node';
 import {
   Links,
-  LiveReload,
+  // LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -22,6 +22,8 @@ export default function App() {
         <Links />
       </head>
       <body>
+        <>OV Search demo</>
+        <br />
         <Outlet />
         <ScrollRestoration />
         <Scripts />

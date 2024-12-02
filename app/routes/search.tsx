@@ -1,83 +1,106 @@
+import type { LoaderFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
 import { renderToString } from 'react-dom/server'
 import {
+  Hits,
+  InstantSearch,
+  InstantSearchSSRProvider,
+  Pagination,
   RefinementList,
+  SearchBox,
+  useInstantSearch,
   getServerState,
-  InstantSearchServerState,
+  useSearchBox,
 } from 'react-instantsearch'
-import type { LoaderFunction, MetaFunction } from '@remix-run/node'
-import { json } from '@remix-run/node'
-import { useLoaderData, useRouteError } from '@remix-run/react'
-import { Panel } from '../components/Panel'
-import { Search } from '../components/search-ui'
+import type { InstantSearchServerState } from 'react-instantsearch'
+import { history } from 'instantsearch.js/cjs/lib/routers/index.js'
 import 'instantsearch.css/themes/algolia-min.css'
-import '../styles/search.css'
+import Searchkit from 'searchkit'
+import Client from '@searchkit/instantsearch-client'
 
-export const meta: MetaFunction = ({ location }) => {
-  const query = new URLSearchParams(
-    location.search
-  ).get("q")
-  return [
-    {
-      title: `${query ? query + ' | ' : '' }Search GBH Open Vault`,
-    },
-    {
-      name: 'description',
-      content:
-        'Search the GBH Open Vault catalog, Scholar Exhibits and Special Collections.',
-    },
-  ]
-}
+import searchkit_options from '../data/searchkit.json'
+import Hit from '../components/Hit'
+import { NoResultsBoundary, NoResults } from '../components/NoResultsBoundary'
+import EmptyQueryBoundary from '../components/EmptyQueryBoundary'
+import Suggestions from '../components/Suggestions'
+
+const sk = new Searchkit(searchkit_options)
 
 export const loader: LoaderFunction = async ({ request }) => {
   const serverUrl = request.url
-  const aapb_host = process.env.AAPB_HOST
-  const serverState = await getServerState(
-    <Search serverUrl={serverUrl} aapb_host={aapb_host} />,
-    {
-      renderToString,
-    }
-  )
+  const serverState = await getServerState(<Search serverUrl={serverUrl} />, {
+    renderToString,
+  })
 
-  return json({
+  return {
     serverState,
     serverUrl,
-    aapb_host,
-  })
+  }
 }
 
-function FallbackComponent({ attribute }: { attribute: string }) {
-  return (
-    <Panel header={attribute}>
-      <RefinementList attribute={attribute} />
-    </Panel>
-  )
-}
-
-export type SearchProps = {
+type SearchProps = {
   serverState?: InstantSearchServerState
-  serverUrl?: URL
-  aapb_host?: URL
+  serverUrl?: string
 }
 
-export default function SearchPage() {
-  const { serverState, serverUrl, aapb_host }: SearchProps = useLoaderData()
+export const searchClient = Client(sk, {
+  getQuery: (query, search_attributes) => {
+    console.log('search query', query, search_attributes)
+    return [
+      {
+        simple_query_string: {
+          query,
+        },
+      },
+    ]
+  },
+})
+
+function Search({ serverState, serverUrl }: SearchProps) {
+  let timerId: NodeJS.Timeout
+  let timeout: number = 300
+
   return (
-    <Search
-      serverState={serverState}
-      serverUrl={serverUrl}
-      aapb_host={aapb_host}
-    />
+    // <InstantSearchSSRProvider {...serverState}>
+    <InstantSearch
+      searchClient={searchClient}
+      indexName='wagtail__wagtailcore_page'
+      routing={{
+        router: history({
+          getLocation() {
+            if (typeof window === 'undefined') {
+              return new URL(serverUrl!) as unknown as Location
+            }
+
+            return window.location
+          },
+        }),
+      }}>
+      {/* The EmptyQueryBoundary (pulled directly from the Instantsearch documentation) does not work with the Suggestions component, even though both work fine individually */}
+      {/* <EmptyQueryBoundary fallback={<Suggestions />}></EmptyQueryBoundary> */}
+      {/* <EmptyQueryBoundary fallback={null}>{<Suggestions />}</EmptyQueryBoundary> */}
+      <Suggestions />
+
+      <SearchBox
+        queryHook={(query, search) => {
+          // debounce the search input box
+          console.log('searchbox', search)
+
+          clearTimeout(timerId)
+          timerId = setTimeout(() => search(query), timeout)
+        }}
+      />
+      <NoResultsBoundary fallback={<NoResults />}>
+        <Hits hitComponent={Hit} />
+        <Pagination />
+      </NoResultsBoundary>
+    </InstantSearch>
+    // </InstantSearchSSRProvider>
   )
 }
 
-export function ErrorBoundary() {
-  const error = useRouteError()
-  console.log('search error', error)
-  return (
-    <div>
-      <h1>Search Error</h1>
-      <h4>We're sorry! Search appears to be broken!</h4>
-      <pre>{error.message}</pre>
-    </div>
-  )
+export default () => {
+  const { serverState, serverUrl } = useLoaderData()
+  // console.log("serverState", serverState);
+  return <Search serverState={serverState} serverUrl={serverUrl} />
 }

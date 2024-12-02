@@ -1,10 +1,10 @@
-import { useInstantSearch } from 'react-instantsearch-core'
+import { useInstantSearch } from 'react-instantsearch'
 
 export function NoResults() {
   const { results } = useInstantSearch()
 
   return (
-    <div className="no-results">
+    <div className='no-results'>
       <h2>
         No results for <i>{results.query}</i>
       </h2>

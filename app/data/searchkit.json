@@ -6,19 +6,21 @@
   "search_settings": {
     "search_attributes": [
       { "field": "title", "weight": 3 },
+      "slug",
       "exhibits_exhibitpage__body_edgengrams",
       "ov_collections_collection__introduction_edgengrams",
       "featured"
     ],
     "result_attributes": [
       "title",
+      "slug",
       "exhibits_exhibitpage__body_edgengrams",
       "ov_collections_collection__introduction_edgengrams"
     ],
     "highlight_attributes": ["title"],
     "snippet_attributes": [
-      "exhibits_exhibitpage__body_edgengrams",
-      "ov_collections_collection__introduction_edgengrams"
+      "exhibits_exhibitpage__body_edgengrams:40",
+      "ov_collections_collection__introduction_edgengrams:40"
     ],
     "facet_attributes": [
       { "attribute": "content_type", "field": "content_type", "type": "string" }

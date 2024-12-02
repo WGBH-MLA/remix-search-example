@@ -1,4 +1,4 @@
-import type { MetaFunction } from '@remix-run/node';
+import type { MetaFunction } from '@remix-run/node'
 import {
   Links,
   // LiveReload,
@@ -6,17 +6,11 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from '@remix-run/react';
-
-// export const meta: MetaFunction = () => ({
-//   charset: 'utf-8',
-//   title: 'React InstantSearch - Remix',
-//   viewport: 'width=device-width,initial-scale=1',
-// });
+} from '@remix-run/react'
 
 export default function App() {
   return (
-    <html lang="en">
+    <html lang='en'>
       <head>
         <Meta />
         <Links />
@@ -29,5 +23,5 @@ export default function App() {
         <Scripts />
       </body>
     </html>
-  );
+  )
 }

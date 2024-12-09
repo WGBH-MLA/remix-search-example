@@ -16,11 +16,12 @@ import {
 } from 'react-instantsearch'
 import type { InstantSearchServerState } from 'react-instantsearch'
 import { history } from 'instantsearch.js/cjs/lib/routers/index.js'
-import 'instantsearch.css/themes/algolia-min.css'
 import Searchkit from 'searchkit'
 import Client from '@searchkit/instantsearch-client'
+import 'instantsearch.css/themes/algolia-min.css'
+import '../app.css'
 
-import searchkit_options from '../data/searchkit.json'
+import searchkit_options from '../data/searchkit'
 import Hit from '../components/Hit'
 import { NoResultsBoundary, NoResults } from '../components/NoResultsBoundary'
 import EmptyQueryBoundary from '../components/EmptyQueryBoundary'
@@ -82,38 +83,43 @@ function Search({ serverState, serverUrl }: SearchProps) {
       {/* <EmptyQueryBoundary fallback={<Suggestions />}> */}
 
       <div className='Container'>
-        <SearchBox
-          queryHook={(query, search) => {
-            // debounce the search input box
-            console.log('searchbox', search)
+        <DynamicWidgets>
+          <Panel header='Content Type'>
+            <RefinementList attribute='content_type' />
+          </Panel>
+        </DynamicWidgets>
+        <div className='Search'>
+          <div className='Search-header'>
+            <SearchBox
+              queryHook={(query, search) => {
+                // debounce the search input box
+                console.log('searchbox', search)
 
-            clearTimeout(timerId)
-            timerId = setTimeout(() => search(query), timeout)
-          }}
-        />
-        <Tabs>
-          <Tab title='Open Vault'>
-            <DynamicWidgets>
-              <Panel header='Content Type'>
-                <RefinementList attribute='content_type' />
-              </Panel>
-            </DynamicWidgets>
-            <EmptyQueryBoundary fallback={null}>{'full'}</EmptyQueryBoundary>
-            {<Suggestions />}
-            <NoResultsBoundary fallback={<NoResults />}>
-              <Hits hitComponent={Hit} />
-              <Pagination />
-            </NoResultsBoundary>
-          </Tab>
-          <Tab title='GBH Series'>
-            <Index indexName='gbh-series'>
+                clearTimeout(timerId)
+                timerId = setTimeout(() => search(query), timeout)
+              }}
+            />
+          </div>
+
+          <Tabs>
+            <Tab title='Open Vault'>
+              <EmptyQueryBoundary fallback={null}>{'full'}</EmptyQueryBoundary>
               {<Suggestions />}
+              <NoResultsBoundary fallback={<NoResults />}>
+                <Hits hitComponent={Hit} />
+                <Pagination />
+              </NoResultsBoundary>
+            </Tab>
+            <Tab title='GBH Series'>
+              <Index indexName='gbh-series'>
+                {<Suggestions />}
 
-              <Hits hitComponent={Hit} />
-              <Pagination />
-            </Index>
-          </Tab>
-        </Tabs>
+                <Hits hitComponent={Hit} />
+                <Pagination />
+              </Index>
+            </Tab>
+          </Tabs>
+        </div>
       </div>
     </InstantSearch>
     // </InstantSearchSSRProvider>

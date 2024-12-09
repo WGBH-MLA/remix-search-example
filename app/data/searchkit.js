@@ -1,4 +1,4 @@
-{
+export default {
   "connection": {
     "host": "https://elastic.wgbh-mla.org",
     "apiKey": "X3NoUXlJMEJZNE9yTDhJMHdMSEQ6N1RLcDQxYm9USEdCV1ByeXJ4MXFDUQ=="

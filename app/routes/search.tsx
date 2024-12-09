@@ -11,6 +11,8 @@ import {
   useInstantSearch,
   getServerState,
   useSearchBox,
+  DynamicWidgets,
+  Index,
 } from 'react-instantsearch'
 import type { InstantSearchServerState } from 'react-instantsearch'
 import { history } from 'instantsearch.js/cjs/lib/routers/index.js'
@@ -23,6 +25,7 @@ import Hit from '../components/Hit'
 import { NoResultsBoundary, NoResults } from '../components/NoResultsBoundary'
 import EmptyQueryBoundary from '../components/EmptyQueryBoundary'
 import Suggestions from '../components/Suggestions'
+import { Panel, Tabs, Tab } from '../components'
 
 const sk = new Searchkit(searchkit_options)
 
@@ -76,24 +79,42 @@ function Search({ serverState, serverUrl }: SearchProps) {
           },
         }),
       }}>
-      {/* The EmptyQueryBoundary (pulled directly from the Instantsearch documentation) does not work with the Suggestions component, even though both work fine individually */}
-      {/* <EmptyQueryBoundary fallback={<Suggestions />}></EmptyQueryBoundary> */}
-      {/* <EmptyQueryBoundary fallback={null}>{<Suggestions />}</EmptyQueryBoundary> */}
-      <Suggestions />
+      {/* <EmptyQueryBoundary fallback={<Suggestions />}> */}
 
-      <SearchBox
-        queryHook={(query, search) => {
-          // debounce the search input box
-          console.log('searchbox', search)
+      <div className='Container'>
+        <SearchBox
+          queryHook={(query, search) => {
+            // debounce the search input box
+            console.log('searchbox', search)
 
-          clearTimeout(timerId)
-          timerId = setTimeout(() => search(query), timeout)
-        }}
-      />
-      <NoResultsBoundary fallback={<NoResults />}>
-        <Hits hitComponent={Hit} />
-        <Pagination />
-      </NoResultsBoundary>
+            clearTimeout(timerId)
+            timerId = setTimeout(() => search(query), timeout)
+          }}
+        />
+        <Tabs>
+          <Tab title='Open Vault'>
+            <DynamicWidgets>
+              <Panel header='Content Type'>
+                <RefinementList attribute='content_type' />
+              </Panel>
+            </DynamicWidgets>
+            <EmptyQueryBoundary fallback={null}>{'full'}</EmptyQueryBoundary>
+            {<Suggestions />}
+            <NoResultsBoundary fallback={<NoResults />}>
+              <Hits hitComponent={Hit} />
+              <Pagination />
+            </NoResultsBoundary>
+          </Tab>
+          <Tab title='GBH Series'>
+            <Index indexName='gbh-series'>
+              {<Suggestions />}
+
+              <Hits hitComponent={Hit} />
+              <Pagination />
+            </Index>
+          </Tab>
+        </Tabs>
+      </div>
     </InstantSearch>
     // </InstantSearchSSRProvider>
   )

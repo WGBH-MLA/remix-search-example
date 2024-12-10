@@ -28,7 +28,7 @@ export const routeToState = (routeState: RouteState) => {
     wagtail__wagtailcore_page: {
       page: routeState.p,
       refinementList: { content_type: routeState.types },
-      toggle: { featured: routeState.featured ? true : undefined},
+      toggle: { featured: routeState.featured ? true : undefined },
     },
   }
 }

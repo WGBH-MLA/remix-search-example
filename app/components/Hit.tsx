@@ -5,6 +5,7 @@ type HitProps = {
   hit: AlgoliaHit<{
     objectID: number
     title: string
+    slug: string
   }>
 }
 
@@ -13,27 +14,30 @@ export const Hit = ({ hit }: HitProps) => {
   switch (true) {
     case 'exhibits_exhibitpage__body_edgengrams' in hit:
       label = 'Scholar Exhibit'
-      route = '/exhibits/' + hit.objectID
+      route = '/exhibits/' + hit.slug
       type = 'exhibit-tag'
       break
     case 'ov_collections_collection__introduction_edgengrams' in hit:
       label = 'Special Collection'
-      route = '/collections/' + hit.objectID
+      route = '/collections/' + hit.slug
       type = 'collection-tag'
       break
     default:
   }
 
   return (
-    <a href={route}>
+    <>
+      {/* <a href={route}> */}
       <div className={`tag ${type}`}>{label}</div>
-      <Highlight attribute="title" hit={hit} />
+      <Highlight attribute='title' hit={hit} />
       <br />
-      <Snippet attribute="exhibits_exhibitpage__body_edgengrams" hit={hit} />
+      <Snippet attribute='exhibits_exhibitpage__body_edgengrams' hit={hit} />
       <Snippet
-        attribute="ov_collections_collection__introduction_edgengrams"
+        attribute='ov_collections_collection__introduction_edgengrams'
         hit={hit}
       />
-    </a>
+
+      {/* </a> */}
+    </>
   )
 }

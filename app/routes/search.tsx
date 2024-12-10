@@ -1,83 +1,102 @@
-import { renderToString } from 'react-dom/server'
+import type { LoaderFunction } from '@remix-run/node'
+
 import {
+  Hits,
+  InstantSearch,
+  Pagination,
   RefinementList,
-  getServerState,
-  InstantSearchServerState,
+  SearchBox,
+  DynamicWidgets,
+  Index,
 } from 'react-instantsearch'
-import type { LoaderFunction, MetaFunction } from '@remix-run/node'
-import { json } from '@remix-run/node'
-import { useLoaderData, useRouteError } from '@remix-run/react'
-import { Panel } from '../components/Panel'
-import { Search } from '../components/search-ui'
+import { history } from 'instantsearch.js/cjs/lib/routers/index.js'
+import Searchkit from 'searchkit'
+import Client from '@searchkit/instantsearch-client'
+import searchkit_options from '../data/searchkit'
+import {
+  Panel,
+  Tabs,
+  Tab,
+  EmptyQueryBoundary,
+  NoResultsBoundary,
+  NoResults,
+  Hit,
+  Suggestions,
+} from '../components'
 import 'instantsearch.css/themes/algolia-min.css'
-import '../styles/search.css'
+import '../app.css'
 
-export const meta: MetaFunction = ({ location }) => {
-  const query = new URLSearchParams(
-    location.search
-  ).get("q")
-  return [
-    {
-      title: `${query ? query + ' | ' : '' }Search GBH Open Vault`,
-    },
-    {
-      name: 'description',
-      content:
-        'Search the GBH Open Vault catalog, Scholar Exhibits and Special Collections.',
-    },
-  ]
-}
+const sk = new Searchkit(searchkit_options)
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const serverUrl = request.url
-  const aapb_host = process.env.AAPB_HOST
-  const serverState = await getServerState(
-    <Search serverUrl={serverUrl} aapb_host={aapb_host} />,
-    {
-      renderToString,
-    }
-  )
+type SearchProps = {}
 
-  return json({
-    serverState,
-    serverUrl,
-    aapb_host,
-  })
-}
+export const searchClient = Client(sk, {
+  getQuery: (query, search_attributes) => {
+    console.log('search query', query, search_attributes)
+    return [
+      {
+        simple_query_string: {
+          query,
+        },
+      },
+    ]
+  },
+})
 
-function FallbackComponent({ attribute }: { attribute: string }) {
+export default ({}: SearchProps) => {
+  let timerId: NodeJS.Timeout
+  let timeout: number = 300
+
   return (
-    <Panel header={attribute}>
-      <RefinementList attribute={attribute} />
-    </Panel>
-  )
-}
+    <InstantSearch
+      searchClient={searchClient}
+      indexName='wagtail__wagtailcore_page'
+      routing={{
+        router: history({
+          cleanUrlOnDispose: false,
+        }),
+      }}
+      future={{
+        preserveSharedStateOnUnmount: true,
+      }}>
+      <div className='Container'>
+        <DynamicWidgets>
+          <Panel header='Content Type'>
+            <RefinementList attribute='content_type' />
+          </Panel>
+        </DynamicWidgets>
+        <div className='Search'>
+          <div className='Search-header'>
+            <SearchBox
+              queryHook={(query, search) => {
+                // debounce the search input box
+                console.log('searchbox', search)
 
-export type SearchProps = {
-  serverState?: InstantSearchServerState
-  serverUrl?: URL
-  aapb_host?: URL
-}
+                clearTimeout(timerId)
+                timerId = setTimeout(() => search(query), timeout)
+              }}
+            />
+          </div>
 
-export default function SearchPage() {
-  const { serverState, serverUrl, aapb_host }: SearchProps = useLoaderData()
-  return (
-    <Search
-      serverState={serverState}
-      serverUrl={serverUrl}
-      aapb_host={aapb_host}
-    />
-  )
-}
-
-export function ErrorBoundary() {
-  const error = useRouteError()
-  console.log('search error', error)
-  return (
-    <div>
-      <h1>Search Error</h1>
-      <h4>We're sorry! Search appears to be broken!</h4>
-      <pre>{error.message}</pre>
-    </div>
+          <Tabs>
+            <Tab title='Open Vault'>
+              <EmptyQueryBoundary fallback={null}>{'full'}</EmptyQueryBoundary>
+              {<Suggestions />}
+              <NoResultsBoundary fallback={<NoResults />}>
+                <Hits hitComponent={Hit} />
+                <Pagination />
+              </NoResultsBoundary>
+            </Tab>
+            <Tab title='GBH Series'>
+              {<Suggestions />}
+              <Index indexName='gbh-series'>
+                <Hits hitComponent={Hit} />
+                <Pagination />
+              </Index>
+            </Tab>
+          </Tabs>
+        </div>
+      </div>
+    </InstantSearch>
   )
 }

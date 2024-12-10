@@ -53,7 +53,7 @@ export default () => {
       <h4>Search suggestions:</h4>
       <ul>
         {default_suggestions.slice(0, 4).map((query) => (
-          <li>{SearchLink(query)}</li>
+          <li key={query}>{SearchLink(query)}</li>
         ))}
       </ul>
     </>

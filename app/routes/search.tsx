@@ -1,20 +1,14 @@
 import type { LoaderFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { renderToString } from 'react-dom/server'
+
 import {
   Hits,
   InstantSearch,
-  InstantSearchSSRProvider,
   Pagination,
   RefinementList,
   SearchBox,
-  useInstantSearch,
-  getServerState,
-  useSearchBox,
   DynamicWidgets,
   Index,
 } from 'react-instantsearch'
-import type { InstantSearchServerState } from 'react-instantsearch'
 import { history } from 'instantsearch.js/cjs/lib/routers/index.js'
 import Searchkit from 'searchkit'
 import Client from '@searchkit/instantsearch-client'
@@ -30,22 +24,9 @@ import { Panel, Tabs, Tab } from '../components'
 
 const sk = new Searchkit(searchkit_options)
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const serverUrl = request.url
-  const serverState = await getServerState(<Search serverUrl={serverUrl} />, {
-    renderToString,
-  })
+// export const loader: LoaderFunction = async ({}) => {}
 
-  return {
-    serverState,
-    serverUrl,
-  }
-}
-
-type SearchProps = {
-  serverState?: InstantSearchServerState
-  serverUrl?: string
-}
+type SearchProps = {}
 
 export const searchClient = Client(sk, {
   getQuery: (query, search_attributes) => {
@@ -60,28 +41,22 @@ export const searchClient = Client(sk, {
   },
 })
 
-function Search({ serverState, serverUrl }: SearchProps) {
+export function Search({}: SearchProps) {
   let timerId: NodeJS.Timeout
   let timeout: number = 300
 
   return (
-    // <InstantSearchSSRProvider {...serverState}>
     <InstantSearch
       searchClient={searchClient}
       indexName='wagtail__wagtailcore_page'
       routing={{
         router: history({
-          getLocation() {
-            if (typeof window === 'undefined') {
-              return new URL(serverUrl!) as unknown as Location
-            }
-
-            return window.location
-          },
+          cleanUrlOnDispose: false,
         }),
+      }}
+      future={{
+        preserveSharedStateOnUnmount: true,
       }}>
-      {/* <EmptyQueryBoundary fallback={<Suggestions />}> */}
-
       <div className='Container'>
         <DynamicWidgets>
           <Panel header='Content Type'>
@@ -111,9 +86,8 @@ function Search({ serverState, serverUrl }: SearchProps) {
               </NoResultsBoundary>
             </Tab>
             <Tab title='GBH Series'>
+              {<Suggestions />}
               <Index indexName='gbh-series'>
-                {<Suggestions />}
-
                 <Hits hitComponent={Hit} />
                 <Pagination />
               </Index>
@@ -122,12 +96,9 @@ function Search({ serverState, serverUrl }: SearchProps) {
         </div>
       </div>
     </InstantSearch>
-    // </InstantSearchSSRProvider>
   )
 }
 
 export default () => {
-  const { serverState, serverUrl } = useLoaderData()
-  // console.log("serverState", serverState);
-  return <Search serverState={serverState} serverUrl={serverUrl} />
+  return <Search />
 }

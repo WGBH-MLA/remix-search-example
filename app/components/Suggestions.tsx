@@ -45,7 +45,7 @@ export const SearchLink = (query) => {
   )
 }
 
-export default () => {
+export const Suggestions = () => {
   const { query } = useSearchBox()
   shuffle(default_suggestions)
   const suggestions = (

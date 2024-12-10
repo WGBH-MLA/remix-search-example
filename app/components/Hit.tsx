@@ -9,7 +9,7 @@ type HitProps = {
   }>
 }
 
-export default ({ hit }: HitProps) => {
+export const Hit = ({ hit }: HitProps) => {
   let route, label, type
   switch (true) {
     case 'exhibits_exhibitpage__body_edgengrams' in hit:

@@ -12,19 +12,21 @@ import {
 import { history } from 'instantsearch.js/cjs/lib/routers/index.js'
 import Searchkit from 'searchkit'
 import Client from '@searchkit/instantsearch-client'
+import searchkit_options from '../data/searchkit'
+import {
+  Panel,
+  Tabs,
+  Tab,
+  EmptyQueryBoundary,
+  NoResultsBoundary,
+  NoResults,
+  Hit,
+  Suggestions,
+} from '../components'
 import 'instantsearch.css/themes/algolia-min.css'
 import '../app.css'
 
-import searchkit_options from '../data/searchkit'
-import Hit from '../components/Hit'
-import { NoResultsBoundary, NoResults } from '../components/NoResultsBoundary'
-import EmptyQueryBoundary from '../components/EmptyQueryBoundary'
-import Suggestions from '../components/Suggestions'
-import { Panel, Tabs, Tab } from '../components'
-
 const sk = new Searchkit(searchkit_options)
-
-// export const loader: LoaderFunction = async ({}) => {}
 
 type SearchProps = {}
 
@@ -41,7 +43,7 @@ export const searchClient = Client(sk, {
   },
 })
 
-export function Search({}: SearchProps) {
+export default ({}: SearchProps) => {
   let timerId: NodeJS.Timeout
   let timeout: number = 300
 
@@ -97,8 +99,4 @@ export function Search({}: SearchProps) {
       </div>
     </InstantSearch>
   )
-}
-
-export default () => {
-  return <Search />
 }

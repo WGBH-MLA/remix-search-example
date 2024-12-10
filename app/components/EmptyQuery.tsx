@@ -1,6 +1,6 @@
 import { useSearchBox } from 'react-instantsearch'
 
-export default ({ children, fallback }) => {
+export const EmptyQueryBoundary = ({ children, fallback }) => {
   const { query } = useSearchBox()
 
   if (!query) {
